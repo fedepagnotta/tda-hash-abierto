@@ -1,26 +1,23 @@
 <div align="right">
-<img width="32px" src="img/algo2.svg">
 </div>
 
 # TDA HASH
 
-## Repositorio de Federico Nicolás Pagnotta Lemes - 110973 - fedepagnotta14@gmail.com
-
 - Para compilar:
 
 ```bash
-gcc src/*.c pruebas_alumno.c -o pruebas_alumno
+gcc src/*.c pruebas.c -o pruebas
 ```
 
 - Para ejecutar:
 
 ```bash
-./pruebas_alumno
+./pruebas
 ```
 
 - Para ejecutar con valgrind:
 ```bash
-valgrind ./pruebas_alumno
+valgrind ./pruebas
 ```
 ---
 ##  Implementación de la tabla
@@ -347,78 +344,3 @@ size_t hash_con_cada_clave(hash_t *hash,
 }
 ```
 Obviamente, iterar todo el hash tiene complejidad __O(n)__, siendo n la cantidad de elementos del hash (a menos que se corte la iteración en el medio).
-
-## Respuestas a las preguntas teóricas
-
-### Qué es un diccionario
-
-Un __diccionario__ es un __TDA__ (tipo de dato abstracto) que almacena __pares clave-valor__. Podríamos verlo como una lista de elementos, pero donde cada elemento está asociado a una clave, una "referencia" que podemos utilizar para acceder a ese elemento.
-
-El ejemplo de diccionario más conocido y utilizado por todos es el __diccionario de lengua__, aquel que contiene definiciones de distintos conceptos y palabras de cada idioma. En este caso, cada __palabra__ a definir es una clave, que va acompañada por su __definición__, que sería el valor que acompaña a esa clave.
-
-Los diccionarios ofrecen una gran performance a la hora de __acceder a los datos__, ya que podemos ir directamente a la clave que acompaña a ese dato para acceder a él. En el ejemplo que di más arriba, para encontrar la definición de una palabra podemos buscarla alfabéticamente y llegar más rápido a ella. No debemos realizar una __búsqueda lineal__ del dato, como en el caso de un vector o lista enlazada.
-
-Por lo general los diccionarios __no admiten claves duplicadas__, y esto agiliza aun más la búsqueda de datos, porque estamos seguros de que cada uno estará asociado a una clave unívoca.
-
-### Qué es una función de hash y qué características debe tener
-
-Una __función hash__ es un __algoritmo matemático__ que toma una entrada o mensaje, y a partir de ella produce una cadena de caracteres alfanuméricos que representa de manera única esa entrada, a esta cadena la llamamos __hash__. Es decir que nos devuelve una cadena encriptada que se crea a partir de la entrada, y siempre ese valor de retorno debe ser igual si la entrada es la misma. 
-
-Por ejemplo, en nuestra implementación de hash, la función hash se encarga de tomar un string y lo convierte en un número entero que representa a ese string. En mi caso decidí sumar los __valores ascii__ de los caracteres de la cadena, y devolví ese valor.
-
-Una función hash debe tener varias __características__ para considerarse como tal:
-
-- Para una entrada, la función hash __debe devolver siempre lo mismo__.
-- Debe ser __imposible conseguir la entrada__ a partir del valor que devuelve la función hash. Por ejemplo, si mi entrada es "hola como te va" y la función hash me devuelve "slkfj242", si uso la función hash nuevamente pero con "slkfj242" como entrada, no me debería devolver "hola como te va".
-- Debería ser difícil encontrar dos entradas que generen __el mismo hash__. Los hashes deberían estar __uniformemente distribuidos__ para una cantidad de entradas.
-
-### Qué es una tabla de Hash y los diferentes métodos de resolución de colisiones vistos (encadenamiento, probing, zona de desborde)
-
-Una __tabla de hash__ es una estructura que contiene __valores__ que están asociados a __claves__ que, por lo general, son unívocas. De esta manera, podemos encontrar los elementos a partir de sus claves. Claramente esto sirve mucho para implementar __diccionarios__. 
-
-La idea de la __tabla de hash__ es obtener una clave, aplicarle una __función hash__, la cual nos devuelve un entero, que luego __modularizamos__. Es decir que tomamos la capacidad que tiene la tabla y hacemos __valor_hash % capacidad__ (obtenemos el resto de la división). Eso nos va a devolver un número que se encuentra entre 0 y la capacidad total de la tabla, por lo que podemos utilizarlo como una __posición__ de la tabla. En esa posición podemos guardar la clave junto con su valor, y de esa forma tenemos acceso muy rápido a los elementos, ya que si queremos buscar un valor, ingresamos su clave asociada, le aplicamos la función hash y vamos a esa posición de la tabla.
-
-<div align="center">
-<img width="100%" src="img/tabla_de_hash.png">
-</div>
-
-_Representación gráfica de distribución de valores en una tabla hash_
-
-A veces puede pasar que a partir de dos claves distintas obtenemos la misma posición de tabla, produciéndose una __colisión__. Cuando tenemos colisiones hay distintas formas de resolverlas, ya que claramente no podemos sobreescribir el valor que se encuentra en esa posición con el nuevo valor, a menos que la clave sea exactamente la misma (incluso esto depende de la implementación de la tabla y si acepta claves repetidas o no).
-Los tres métodos que vimos para resolver una colisión son:
-
-#### Encadenamiento
-
-Este método es el que utilizamos en nuestra implementación del __TDA Hash__. La idea es que, en la tabla, no tenemos directamente los valores, sino que tenemos __punteros__ a otro TDA, ya sea un vector dinámico, una lista enlazada, un abb, etc. En estos TDA vamos guardando los __pares clave-valor__, por lo que, cuando tenemos una colisión, simplemente insertamos en el TDA. 
-
-Este tipo de tabla de hash, al no tener los elementos en la propia tabla, se denomina __abierto__, y el direccionamiento de los valores es __cerrado__, ya que los valores se encuentran en la posición que corresponde a su clave, y no se mueven de ahí.
-
-En este tipo de hash, para buscar vamos al TDA que se encuentra en la posición de la clave que queremos buscar, y buscamos el elemento en ese TDA.
-
-Ya representé gráficamente este tipo de hash en memoria cuando expliqué la estructura que utilicé para implementar el TDA. Como vemos, en esa representación, en la posición 0 de la tabla, tenemos una lista enlazada con 2 elementos. Esto quiere decir que hubo una colisión en la posición 0 al insertar un elemento, y este fue insertado al final de esa lista. Vuelvo a dejar la representación gráfica aquí abajo:
-
-<div align="center">
-<img width="100%" src="img/hash.png">
-</div>
-
-#### Probing
-
-Si los valores se guardan directamente en la tabla hash, la tabla es de tipo __cerrado__. En este tipo de hash tenemos varias formas de manejar las colisiones, y una de ellas es el __probing__. La idea es simplemente seguir recorriendo la tabla hasta que haya un espacio libre, y ahí insertamos el elemento. Como vemos, en este caso, al haber una colisión el elemento se mueve de posición, por lo que el direccionamiento es __abierto__. Los elementos no se quedan sí o sí en la posición correspondiente a su clave asociada, sino que pueden moverse.
-
-<div align="center">
-<img width="100%" src="img/probing.png">
-</div>
-
-_Representación gráfica de probing lineal_
-
-Si luego buscamos un valor que había colisionado y no se encuentra en la posición correspondiente a su clave, seguimos recorriendo __linealmente__ la tabla hasta encontrar el valor o llegar a un espacio libre (en ese caso es porque el valor no está en la tabla).
-
-#### Zona de desborde
-
-La idea de este método es tener justamente una __zona de desborde__, donde van los elementos que colisionaron. Esta zona de desborde puede ser cualquier TDA, y si un elemento colisiona se inserta ahí. Luego si queremos buscar un elemento y no está en la posición correspondiente a su clave, vamos a la zona de desborde y lo buscamos linealmente.
-
-<div align="center">
-<img width="100%" src="img/zona_desborde.png">
-</div>
-
-_Representación gráfica de zona de desborde con vector dinámico_
